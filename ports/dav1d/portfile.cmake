@@ -6,6 +6,8 @@ vcpkg_from_gitlab(
     SHA512 8a9c8079ef8dd32bec2df626db68829ac2210c7754e72e18c74afcff5fa3d4aecfd55c54078c57669a86949b2ce7be803e75f1b8279959e0427661bb7302052d
 )
 
+set(ENABLE_ASM true)
+
 if (VCPKG_TARGET_ARCHITECTURE STREQUAL "x86" OR VCPKG_TARGET_ARCHITECTURE STREQUAL "x64")
     vcpkg_find_acquire_program(NASM)
     get_filename_component(NASM_EXE_PATH ${NASM} DIRECTORY)
@@ -16,6 +18,8 @@ elseif (VCPKG_TARGET_IS_WINDOWS)
         get_filename_component(GAS_ITEM_PATH ${GAS_PATH} DIRECTORY)
         vcpkg_add_to_path(${GAS_ITEM_PATH})
     endforeach(GAS_PATH)
+elseif (VCPKG_TARGET_IS_OSX AND VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
+    set(ENABLE_ASM false)
 endif()
 
 set(LIBRARY_TYPE ${VCPKG_LIBRARY_LINKAGE})
@@ -29,6 +33,7 @@ vcpkg_configure_meson(
         --default-library=${LIBRARY_TYPE}
         -Denable_tests=false
         -Denable_tools=false
+        -Denable_asm=${ENABLE_ASM}
 )
 
 vcpkg_install_meson()
